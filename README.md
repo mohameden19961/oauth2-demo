@@ -1,101 +1,71 @@
-# 🔐 OAuth2 & JWT Centralized Auth Server
+# 🔐 Centralized Auth Server (OAuth2 + JWT)
 
-Un serveur d'authentification prêt à l'emploi (Spring Boot 3) qui permet de centraliser l'authentification OAuth2 (Google) et de délivrer des JWT sécurisés pour tous tes autres projets.
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 Caractéristiques
-- **Centralisé** : Un seul serveur pour authentifier tous tes backends (Node.js, Python, Laravel...).
-- **Sécurisé** : Utilise OAuth2 standard et génère des Access/Refresh Tokens via JWT (HMAC-SHA).
-- **Persistant** : Les tokens sont gérés en base de données (PostgreSQL) avec un nettoyage automatique des tokens expirés.
-- **Réutilisable** : Intègre un endpoint `/auth/login` avec redirection configurable et un endpoint `/api/auth/validate`.
+Un serveur d'authentification **prêt pour la production**, conçu pour servir d'identité centrale à tous vos projets. Il transforme la connexion Google OAuth2 en jetons JWT sécurisés et persistants en base de données.
 
 ---
 
-## 🛠️ Installation et Configuration
-
-### 1. Cloner le projet
-```bash
-git clone https://github.com/votre-user/oauth2-demo.git
-cd oauth2-demo
-```
-
-### 2. Configurer les secrets (Sécurité 🛡️)
-Le projet utilise des variables d'environnement pour protéger vos clés. **Ne jamais modifier les clés directement dans `application.properties`.**
-
-Créez un script ou configurez votre environnement avec les variables suivantes :
-
-| Variable | Description | Où la trouver ? |
-|----------|-------------|-----------------|
-| `GOOGLE_CLIENT_ID` | Client ID Google OAuth2 | [Google Cloud Console](https://console.cloud.google.com/) |
-| `GOOGLE_CLIENT_SECRET` | Secret Google OAuth2 | [Google Cloud Console](https://console.cloud.google.com/) |
-| `DB_URL` | URL JDBC PostgreSQL | [Supabase Database Settings](https://supabase.com/) |
-| `DB_USER` | Utilisateur DB | [Supabase Database Settings](https://supabase.com/) |
-| `DB_PASSWORD` | Mot de passe DB | [Supabase Database Settings](https://supabase.com/) |
-| `JWT_SECRET` | Clé secrète JWT (min 32 chars) | Une chaîne aléatoire que vous choisissez |
-
-### 3. Lancer le projet
-```bash
-./mvnw spring-boot:run
-```
+## ✨ Pourquoi utiliser ce projet ?
+- **SSO (Single Sign-On)** : Une seule connexion pour toutes vos applications.
+- **Sécurité Hybride** : La légèreté des JWT combinée à la sécurité d'une base de données (permet la révocation instantanée des tokens).
+- **Multi-Projets** : Redirection dynamique vers vos différentes applications via `redirect_uri`.
+- **Cloud-Ready** : Déploiement optimisé pour Docker et Render.
 
 ---
 
-## 🛠️ Documentation de l'API (Endpoints)
+## 🚀 Démarrage Rapide
 
-Voici toutes les requêtes que vous pouvez effectuer sur ce serveur :
+### 1. Variables d'Environnement
+Ne modifiez jamais `application.properties`. Configurez ces variables dans votre environnement :
 
-### 1. Authentification et Session
+| Variable | Description |
+| :--- | :--- |
+| `GOOGLE_CLIENT_ID` | Votre ID client Google Cloud |
+| `GOOGLE_CLIENT_SECRET` | Votre secret client Google Cloud |
+| `DB_URL` | URL JDBC PostgreSQL (ex: Supabase) |
+| `DB_USER` / `DB_PASSWORD` | Identifiants de votre base de données |
+| `JWT_SECRET` | Une clé secrète de 32 caractères minimum |
 
-| Méthode | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/auth/login` | **Initialiser la connexion**. Paramètre optionnel `?redirect_uri=...` pour rediriger après succès. |
-| `GET` | `/api/auth/token` | **Récupérer les tokens**. Utilisé après le succès du login Google. |
-| `POST` | `/api/auth/refresh` | **Rafraîchir le token**. Nécessite le `refresh_token` (en cookie ou header `X-Refresh-Token`). |
-| `POST` | `/api/auth/logout` | **Déconnexion**. Invalide le token en BDD et supprime le cookie. |
-
-**Exemple Logout :**
+### 2. Lancement Docker
 ```bash
-curl -X POST -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/auth/logout
-```
-
-### 2. Validation (Pour les autres Backends)
-
-| Méthode | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/auth/validate` | Vérifie si le token est valide, non expiré et non révoqué. |
-
-**Exemple de validation :**
-```bash
-curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/auth/validate
-```
-*Réponse attendue :* `{"valid": true, "email": "...", "role": "USER"}`
-
-### 3. Utilisateur
-
-| Méthode | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/user/me` | Récupère le profil complet de l'utilisateur connecté. |
-
-```bash
-curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/user/me
+docker build -t oauth2-auth .
+docker run -p 8080:8080 --env-file .env oauth2-auth
 ```
 
 ---
 
-## 🔍 Comment obtenir les clés ?
+## 🛠️ Documentation de l'API
 
-### 🌐 Google OAuth2
-1. Allez sur [Google Cloud Console](https://console.cloud.google.com/).
-2. Créez un projet.
-3. Allez dans **API et services > Identifiants**.
-4. Créez un **ID de client OAuth 2.0** (Type: Application Web).
-5. Ajoutez `http://localhost:8080/login/oauth2/code/google` dans les **URI de redirection autorisés**.
+### Authentification
+- **`GET /auth/login`** : Lance le flux Google.
+  - *Paramètre :* `?redirect_uri=...` (Optionnel)
+- **`POST /api/auth/logout`** : Invalide la session et supprime les cookies.
+- **`POST /api/auth/refresh`** : Renouvelle l'Access Token.
 
-### ⚡ Supabase (PostgreSQL)
-1. Créez un projet sur [Supabase](https://supabase.com/).
-2. Allez dans **Project Settings > Database**.
-3. Copiez l'URL de connexion dans la section **Connection String > JDBC**.
+### Validation (Pour vos autres Backends)
+- **`GET /api/auth/validate`** :
+  - *Header :* `Authorization: Bearer <TOKEN>`
+  - *Réponse :* `{"valid": true, "email": "...", "role": "USER"}`
 
 ---
 
-## 👨‍💻 Développé avec ❤️
-Spring Boot 3.4.5, Spring Security, JJWT, PostgreSQL (Supabase).
+## 🌐 Déploiement sur Render
+Ce projet est optimisé pour un déploiement gratuit sur [Render.com](https://render.com) :
+1. Créez un **Web Service**.
+2. Sélectionnez le runtime **Docker**.
+3. Ajoutez les variables d'environnement listées plus haut.
+4. Dans Google Cloud, n'oubliez pas d'ajouter votre URL Render (ex: `https://votre-app.onrender.com/login/oauth2/code/google`) dans les **Authorized Redirect URIs**.
+
+---
+
+## ⚙️ Architecture Technique
+- **Backend** : Spring Boot 3 + Spring Security + JJWT.
+- **Database** : PostgreSQL (gérée par Spring Data JPA).
+- **Cleanup** : Task scheduler intégré pour nettoyer les tokens expirés toutes les heures.
+- **Proxy** : Support natif des headers X-Forwarded-For pour le déploiement Cloud.
+
+---
+Développé avec ❤️ pour simplifier l'authentification moderne.
