@@ -31,18 +31,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-
+        
         String email   = oAuth2User.getAttribute("email");
         String name    = oAuth2User.getAttribute("name");
         String picture = oAuth2User.getAttribute("picture");
-
-        // GitHub : champs différents
-        if (email == null) {
-            Object login = oAuth2User.getAttribute("login");
-            email   = login + "@github.com";
-            name    = login != null ? login.toString() : "unknown";
-            picture = oAuth2User.getAttribute("avatar_url");
-        }
 
         final String finalEmail   = email;
         final String finalName    = name;

@@ -18,22 +18,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest request) {
         OAuth2User oAuth2User = super.loadUser(request);
 
-        String provider = request.getClientRegistration().getRegistrationId();
-
         String email   = oAuth2User.getAttribute("email");
         String name    = oAuth2User.getAttribute("name");
         String picture = oAuth2User.getAttribute("picture");
-
-        // GitHub spécifique
-        if ("github".equals(provider)) {
-            if (email == null) {
-                email = oAuth2User.getAttribute("login") + "@github.com";
-            }
-            if (name == null) {
-                name = oAuth2User.getAttribute("login");
-            }
-            picture = oAuth2User.getAttribute("avatar_url");
-        }
 
         final String finalEmail   = email;
         final String finalName    = name;

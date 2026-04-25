@@ -1,6 +1,6 @@
 # 🔐 OAuth2 & JWT Centralized Auth Server
 
-Un serveur d'authentification prêt à l'emploi (Spring Boot 3) qui permet de centraliser l'authentification OAuth2 (Google, GitHub) et de délivrer des JWT sécurisés pour tous tes autres projets.
+Un serveur d'authentification prêt à l'emploi (Spring Boot 3) qui permet de centraliser l'authentification OAuth2 (Google) et de délivrer des JWT sécurisés pour tous tes autres projets.
 
 ## 🚀 Caractéristiques
 - **Centralisé** : Un seul serveur pour authentifier tous tes backends (Node.js, Python, Laravel...).
