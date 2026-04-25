@@ -39,27 +39,44 @@ Créez un script ou configurez votre environnement avec les variables suivantes 
 
 ---
 
-## 📖 Guide d'utilisation (Auth-as-a-Service)
+## 🛠️ Documentation de l'API (Endpoints)
 
-### 1. Pour vos applications clientes (Frontend)
-Redirigez l'utilisateur vers cet URL pour lancer le login :
-`GET /auth/login?redirect_uri=https://mon-app.com/callback`
+Voici toutes les requêtes que vous pouvez effectuer sur ce serveur :
 
-Après le succès de Google Login, le serveur renverra l'utilisateur vers votre `redirect_uri` avec les tokens :
-`https://mon-app.com/callback?access_token=...&refresh_token=...`
+### 1. Authentification et Session
 
-### 2. Pour vos autres Backends (Validation)
-Vos autres serveurs peuvent vérifier la validité d'un token reçu d'un client :
-`GET /api/auth/validate`
-Header: `Authorization: Bearer <access_token>`
+| Méthode | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/auth/login` | **Initialiser la connexion**. Paramètre optionnel `?redirect_uri=...` pour rediriger après succès. |
+| `GET` | `/api/auth/token` | **Récupérer les tokens**. Utilisé après le succès du login Google. |
+| `POST` | `/api/auth/refresh` | **Rafraîchir le token**. Nécessite le `refresh_token` (en cookie ou header `X-Refresh-Token`). |
+| `POST` | `/api/auth/logout` | **Déconnexion**. Invalide le token en BDD et supprime le cookie. |
 
-**Réponse JSON :**
-```json
-{
-  "valid": true,
-  "email": "user@example.com",
-  "role": "USER"
-}
+**Exemple Logout :**
+```bash
+curl -X POST -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/auth/logout
+```
+
+### 2. Validation (Pour les autres Backends)
+
+| Méthode | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/auth/validate` | Vérifie si le token est valide, non expiré et non révoqué. |
+
+**Exemple de validation :**
+```bash
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/auth/validate
+```
+*Réponse attendue :* `{"valid": true, "email": "...", "role": "USER"}`
+
+### 3. Utilisateur
+
+| Méthode | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/user/me` | Récupère le profil complet de l'utilisateur connecté. |
+
+```bash
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/user/me
 ```
 
 ---
@@ -81,4 +98,4 @@ Header: `Authorization: Bearer <access_token>`
 ---
 
 ## 👨‍💻 Développé avec ❤️
-Spring Boot 3.4.5, Spring Security, JJWT, PostgreSQL.
+Spring Boot 3.4.5, Spring Security, JJWT, PostgreSQL (Supabase).
