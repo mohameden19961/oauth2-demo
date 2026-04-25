@@ -37,22 +37,20 @@ docker run -p 8080:8080 --env-file .env oauth2-auth
 
 ---
 
-## 🛠️ Documentation de l'API
+## 🛠️ Documentation Complète de l'API
 
-### Authentification
-- **`GET /auth/login`** : Lance le flux Google.
-  - *Paramètre :* `?redirect_uri=...` (Optionnel)
-- **`POST /api/auth/logout`** : Invalide la session et supprime les cookies.
-- **`POST /api/auth/refresh`** : Renouvelle l'Access Token.
-
-### Validation (Pour vos autres Backends)
-- **`GET /api/auth/validate`** :
-  - *Header :* `Authorization: Bearer <TOKEN>`
-  - *Réponse :* `{"valid": true, "email": "...", "role": "USER"}`
+| Type | Endpoint | Description | Auth Recquise |
+| :--- | :--- | :--- | :--- |
+| **`GET`** | `/auth/login` | **Point d'entrée** pour lancer le flux Google OAuth2 (Accepte `?redirect_uri=...`). | ❌ Non |
+| **`GET`** | `/api/auth/token` | Retourne les tokens JSON après un login réussi. | ✅ Oui (Cookie) |
+| **`POST`** | `/api/auth/refresh` | **Rafraîchissement** de l'Access Token expiré via le Refresh Token. | ❌ Non |
+| **`POST`** | `/api/auth/logout` | **Déconnexion** : Révoque le token en BDD et nettoie les cookies. | ✅ Oui |
+| **`GET`** | `/api/auth/validate` | **Validation** pour les autres backends (Vérifie Signature + BDD). | ✅ Oui (Bearer) |
+| **`GET`** | `/api/user/me` | Récupère le profil de l'utilisateur (Email, Nom, Image, Rôle). | ✅ Oui |
 
 ---
 
-## 🌐 Déploiement sur Render
+## 📖 Guide d'Intégration
 Ce projet est optimisé pour un déploiement gratuit sur [Render.com](https://render.com) :
 1. Créez un **Web Service**.
 2. Sélectionnez le runtime **Docker**.
